@@ -38,6 +38,7 @@ class Upgrades {
             lc.startAutoGeneration(this.lcGeneration, this.interval);
         }
         this.notifySubscribers()
+        this.saveInLocalStorage();
     }
 
     handleUpgrade = () => {
@@ -62,10 +63,31 @@ class Upgrades {
             callback();
         });
     }
+
+    saveInLocalStorage(){
+        localStorage.setItem("upgrade-" + this.id , JSON.stringify(this));
+    }
 }
 
 const UpgradesList = upgradesJson.technology.map((upgrade) => {
     return new Upgrades(upgrade.id, upgrade.upgrades, upgrade.price, upgrade.growth, upgrade.lcGeneration);
+});
+
+UpgradesList.forEach((upgrade) => {
+    if (localStorage.getItem("upgrade-" + upgrade.id) !== null){
+        let upgradeFromLocalStorage = JSON.parse(localStorage.getItem("upgrade-" + upgrade.id));
+        upgrade.lvl = upgradeFromLocalStorage.lvl;
+        upgrade.name = upgradeFromLocalStorage.namesList[upgrade.lvl];
+        upgrade.price = upgradeFromLocalStorage.price;
+        upgrade.interval = upgradeFromLocalStorage.interval;
+        upgrade.notifySubscribers();
+
+        //trow all the upgrades lc generation of the lvls
+        for (let i = 1; i <= upgrade.lvl; i++) {
+            upgrade.lcGeneration = upgrade.lcGeneration * Math.pow(2, i);
+            lc.startAutoGeneration(upgrade.lcGeneration, upgrade.interval)
+        }
+    }
 });
 
 export default UpgradesList;

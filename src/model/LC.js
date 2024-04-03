@@ -14,6 +14,7 @@ class LC {
     setLc(value){
         this.lc = value;
         this.notifySubscribers();
+        this.saveInLocalStorage()
     }
 
     addLc(amount){
@@ -45,8 +46,17 @@ class LC {
             callback();
         });
     }
+
+    saveInLocalStorage(){
+        localStorage.setItem("lc", JSON.stringify(this));
+    }
 }
 
-const lc = new LC();
+let lc = new LC();
+if (localStorage.getItem("lc") !== null){
+    let lcFromLocalStorage = JSON.parse(localStorage.getItem("lc"));
+    lc.lc = lcFromLocalStorage.lc;
+    lc.notifySubscribers();
+}
 
 export default lc;
